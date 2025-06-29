@@ -85,6 +85,7 @@ function Login({ switchToRegister }) {
                     <p>Enter the OTP sent to your {authMethod}</p>
                     
                     {error && <div className="error">{error}</div>}
+                    }
                     
                     <form onSubmit={handleVerifyOTP}>
                         <div className="input-control">
@@ -147,6 +148,7 @@ function Login({ switchToRegister }) {
                     </div>
                     
                     {error && <div className="error">{error}</div>}
+                    }
                     
                     <form onSubmit={handleForgotPassword}>
                         {authMethod === 'email' ? (
@@ -200,6 +202,7 @@ function Login({ switchToRegister }) {
                     <p>Enter OTP and new password</p>
                     
                     {error && <div className="error">{error}</div>}
+                    }
                     {newPassword !== confirmNewPassword && confirmNewPassword && (
                         <div className="error">Passwords do not match</div>
                     )}
@@ -282,6 +285,7 @@ function Login({ switchToRegister }) {
                 </div>
                 
                 {error && <div className="error">{error}</div>}
+                }
                 
                 <form onSubmit={handleLogin}>
                     {authMethod === 'email' ? (
