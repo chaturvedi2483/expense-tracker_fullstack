@@ -70,6 +70,7 @@ function Register({ switchToLogin }) {
                     <p>Enter the OTP sent to your {authMethod}</p>
                     
                     {error && <div className="error">{error}</div>}
+                    }
                     
                     <form onSubmit={handleVerifyOTP}>
                         <div className="input-control">
@@ -131,6 +132,7 @@ function Register({ switchToLogin }) {
                 </div>
                 
                 {error && <div className="error">{error}</div>}
+                }
                 {password !== confirmPassword && confirmPassword && (
                     <div className="error">Passwords do not match</div>
                 )}
