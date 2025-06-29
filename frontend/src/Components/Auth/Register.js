@@ -41,6 +41,7 @@ function Register({ switchToLogin }) {
                 <p>Join us to start tracking your expenses</p>
                 
                 {error && <div className="error">{error}</div>}
+                }
                 {password !== confirmPassword && confirmPassword && (
                     <div className="error">Passwords do not match</div>
                 )}

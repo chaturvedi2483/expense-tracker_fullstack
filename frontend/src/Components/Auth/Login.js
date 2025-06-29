@@ -34,6 +34,7 @@ function Login({ switchToRegister }) {
                 <p>Sign in to your account</p>
                 
                 {error && <div className="error">{error}</div>}
+                }
                 
                 <form onSubmit={handleSubmit}>
                     <div className="input-control">
