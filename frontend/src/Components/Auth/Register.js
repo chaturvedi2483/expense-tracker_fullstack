@@ -4,7 +4,7 @@ import { useGlobalContext } from '../../context/globalContext'
 import Button from '../Button/Button'
 
 function Register({ switchToLogin }) {
-    const { register, error, loading } = useGlobalContext()
+    const { register, error, loading, verifyOTP, resendOTP } = useGlobalContext()
     const [step, setStep] = useState('register') // 'register' or 'verify'
     const [userId, setUserId] = useState(null)
     const [authMethod, setAuthMethod] = useState('email') // 'email' or 'phone'
@@ -48,7 +48,6 @@ function Register({ switchToLogin }) {
 
     const handleVerifyOTP = async (e) => {
         e.preventDefault()
-        const { verifyOTP } = useGlobalContext()
         
         const result = await verifyOTP({ userId, otp })
         if (result.success) {
@@ -58,7 +57,6 @@ function Register({ switchToLogin }) {
     }
 
     const handleResendOTP = async () => {
-        const { resendOTP } = useGlobalContext()
         await resendOTP({ userId })
     }
 
@@ -70,7 +68,6 @@ function Register({ switchToLogin }) {
                     <p>Enter the OTP sent to your {authMethod}</p>
                     
                     {error && <div className="error">{error}</div>}
-                    }
                     
                     <form onSubmit={handleVerifyOTP}>
                         <div className="input-control">
@@ -132,7 +129,6 @@ function Register({ switchToLogin }) {
                 </div>
                 
                 {error && <div className="error">{error}</div>}
-                }
                 {password !== confirmPassword && confirmPassword && (
                     <div className="error">Passwords do not match</div>
                 )}

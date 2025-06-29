@@ -4,9 +4,9 @@ import { useGlobalContext } from '../../context/globalContext'
 import Button from '../Button/Button'
 
 function Login({ switchToRegister }) {
-    const { login, error, loading, verifyOTP, resendOTP } = useGlobalContext()
+    const { login, error, loading, verifyOTP, resendOTP, forgotPassword, resetPassword } = useGlobalContext()
     const [authMethod, setAuthMethod] = useState('email') // 'email' or 'phone'
-    const [step, setStep] = useState('login') // 'login', 'verify', 'forgot'
+    const [step, setStep] = useState('login') // 'login', 'verify', 'forgot', 'reset'
     const [userId, setUserId] = useState(null)
     const [formData, setFormData] = useState({
         email: '',
@@ -57,7 +57,6 @@ function Login({ switchToRegister }) {
 
     const handleForgotPassword = async (e) => {
         e.preventDefault()
-        const { forgotPassword } = useGlobalContext()
         const forgotData = authMethod === 'email' ? { email } : { phone }
         
         const result = await forgotPassword(forgotData)
@@ -71,7 +70,6 @@ function Login({ switchToRegister }) {
         e.preventDefault()
         if (newPassword !== confirmNewPassword) return
         
-        const { resetPassword } = useGlobalContext()
         const result = await resetPassword({ userId, otp, newPassword })
         if (result.success) {
             setFormData({ email: '', phone: '', password: '', otp: '', newPassword: '', confirmNewPassword: '' })
@@ -87,7 +85,6 @@ function Login({ switchToRegister }) {
                     <p>Enter the OTP sent to your {authMethod}</p>
                     
                     {error && <div className="error">{error}</div>}
-                    }
                     
                     <form onSubmit={handleVerifyOTP}>
                         <div className="input-control">
@@ -150,7 +147,6 @@ function Login({ switchToRegister }) {
                     </div>
                     
                     {error && <div className="error">{error}</div>}
-                    }
                     
                     <form onSubmit={handleForgotPassword}>
                         {authMethod === 'email' ? (
@@ -204,7 +200,6 @@ function Login({ switchToRegister }) {
                     <p>Enter OTP and new password</p>
                     
                     {error && <div className="error">{error}</div>}
-                    }
                     {newPassword !== confirmNewPassword && confirmNewPassword && (
                         <div className="error">Passwords do not match</div>
                     )}
@@ -287,7 +282,6 @@ function Login({ switchToRegister }) {
                 </div>
                 
                 {error && <div className="error">{error}</div>}
-                }
                 
                 <form onSubmit={handleLogin}>
                     {authMethod === 'email' ? (
