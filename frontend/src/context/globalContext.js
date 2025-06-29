@@ -158,8 +158,10 @@ export const GlobalProvider = ({children}) => {
             const response = await axios.post(`${BASE_URL}add-income`, income);
             getIncomes();
             setError(null);
+            return { success: true };
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add income');
+            return { success: false };
         }
     }
 
@@ -178,8 +180,10 @@ export const GlobalProvider = ({children}) => {
             getIncomes();
             setError(null);
             setEditingItem(null);
+            return { success: true };
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update income');
+            return { success: false };
         }
     }
 
@@ -187,6 +191,7 @@ export const GlobalProvider = ({children}) => {
         try {
             await axios.delete(`${BASE_URL}delete-income/${id}`);
             getIncomes();
+            setError(null);
         } catch (err) {
             setError('Failed to delete income');
         }
@@ -206,8 +211,10 @@ export const GlobalProvider = ({children}) => {
             const response = await axios.post(`${BASE_URL}add-expense`, expense);
             getExpenses();
             setError(null);
+            return { success: true };
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add expense');
+            return { success: false };
         }
     }
 
@@ -226,8 +233,10 @@ export const GlobalProvider = ({children}) => {
             getExpenses();
             setError(null);
             setEditingItem(null);
+            return { success: true };
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update expense');
+            return { success: false };
         }
     }
 
@@ -235,6 +244,7 @@ export const GlobalProvider = ({children}) => {
         try {
             await axios.delete(`${BASE_URL}delete-expense/${id}`);
             getExpenses();
+            setError(null);
         } catch (err) {
             setError('Failed to delete expense');
         }
