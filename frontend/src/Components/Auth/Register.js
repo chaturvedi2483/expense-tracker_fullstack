@@ -5,14 +5,19 @@ import Button from '../Button/Button'
 
 function Register({ switchToLogin }) {
     const { register, error, loading } = useGlobalContext()
+    const [step, setStep] = useState('register') // 'register' or 'verify'
+    const [userId, setUserId] = useState(null)
+    const [authMethod, setAuthMethod] = useState('email') // 'email' or 'phone'
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        phone: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        otp: ''
     })
 
-    const { name, email, password, confirmPassword } = formData
+    const { name, email, phone, password, confirmPassword, otp } = formData
 
     const handleChange = (e) => {
         setFormData({
@@ -21,17 +26,85 @@ function Register({ switchToLogin }) {
         })
     }
 
-    const handleSubmit = async (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault()
         
         if (password !== confirmPassword) {
-            return // Error will be shown in validation
+            return
         }
         
-        const result = await register({ name, email, password })
-        if (result.success) {
-            setFormData({ name: '', email: '', password: '', confirmPassword: '' })
+        const registerData = {
+            name,
+            password,
+            ...(authMethod === 'email' ? { email } : { phone })
         }
+        
+        const result = await register(registerData)
+        if (result.success) {
+            setUserId(result.userId)
+            setStep('verify')
+        }
+    }
+
+    const handleVerifyOTP = async (e) => {
+        e.preventDefault()
+        const { verifyOTP } = useGlobalContext()
+        
+        const result = await verifyOTP({ userId, otp })
+        if (result.success) {
+            setFormData({ name: '', email: '', phone: '', password: '', confirmPassword: '', otp: '' })
+            setStep('register')
+        }
+    }
+
+    const handleResendOTP = async () => {
+        const { resendOTP } = useGlobalContext()
+        await resendOTP({ userId })
+    }
+
+    if (step === 'verify') {
+        return (
+            <RegisterStyled>
+                <div className="auth-container">
+                    <h2>Verify Your Account</h2>
+                    <p>Enter the OTP sent to your {authMethod}</p>
+                    
+                    {error && <div className="error">{error}</div>}
+                    
+                    <form onSubmit={handleVerifyOTP}>
+                        <div className="input-control">
+                            <input
+                                type="text"
+                                name="otp"
+                                value={otp}
+                                placeholder="Enter 6-digit OTP"
+                                onChange={handleChange}
+                                maxLength="6"
+                                required
+                            />
+                        </div>
+                        
+                        <Button
+                            name={loading ? 'Verifying...' : 'Verify OTP'}
+                            bPad={'1rem 2rem'}
+                            bRad={'10px'}
+                            bg={'var(--color-accent)'}
+                            color={'#fff'}
+                            disabled={loading}
+                        />
+                    </form>
+                    
+                    <div className="otp-actions">
+                        <span onClick={handleResendOTP} className="resend-link">
+                            Resend OTP
+                        </span>
+                        <span onClick={() => setStep('register')} className="back-link">
+                            Back to Registration
+                        </span>
+                    </div>
+                </div>
+            </RegisterStyled>
+        )
     }
 
     return (
@@ -40,13 +113,29 @@ function Register({ switchToLogin }) {
                 <h2>Create Account</h2>
                 <p>Join us to start tracking your expenses</p>
                 
+                <div className="auth-method-selector">
+                    <button
+                        type="button"
+                        className={authMethod === 'email' ? 'active' : ''}
+                        onClick={() => setAuthMethod('email')}
+                    >
+                        Email
+                    </button>
+                    <button
+                        type="button"
+                        className={authMethod === 'phone' ? 'active' : ''}
+                        onClick={() => setAuthMethod('phone')}
+                    >
+                        Phone
+                    </button>
+                </div>
+                
                 {error && <div className="error">{error}</div>}
-                }
                 {password !== confirmPassword && confirmPassword && (
                     <div className="error">Passwords do not match</div>
                 )}
                 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleRegister}>
                     <div className="input-control">
                         <input
                             type="text"
@@ -58,16 +147,29 @@ function Register({ switchToLogin }) {
                         />
                     </div>
                     
-                    <div className="input-control">
-                        <input
-                            type="email"
-                            name="email"
-                            value={email}
-                            placeholder="Email"
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    {authMethod === 'email' ? (
+                        <div className="input-control">
+                            <input
+                                type="email"
+                                name="email"
+                                value={email}
+                                placeholder="Email"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    ) : (
+                        <div className="input-control">
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={phone}
+                                placeholder="Phone Number"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    )}
                     
                     <div className="input-control">
                         <input
@@ -138,6 +240,33 @@ const RegisterStyled = styled.div`
             margin-bottom: 2rem;
         }
         
+        .auth-method-selector {
+            display: flex;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e1e1e1;
+            
+            button {
+                flex: 1;
+                padding: 1rem;
+                border: none;
+                background: #f8f9fa;
+                color: #666;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                
+                &.active {
+                    background: var(--color-accent);
+                    color: white;
+                }
+                
+                &:hover:not(.active) {
+                    background: #e9ecef;
+                }
+            }
+        }
+        
         form {
             display: flex;
             flex-direction: column;
@@ -181,6 +310,22 @@ const RegisterStyled = styled.div`
             color: var(--primary-color);
             
             span {
+                color: var(--color-accent);
+                cursor: pointer;
+                font-weight: 600;
+                
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+        
+        .otp-actions {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            
+            .resend-link, .back-link {
                 color: var(--color-accent);
                 cursor: pointer;
                 font-weight: 600;

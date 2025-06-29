@@ -4,13 +4,20 @@ import { useGlobalContext } from '../../context/globalContext'
 import Button from '../Button/Button'
 
 function Login({ switchToRegister }) {
-    const { login, error, loading } = useGlobalContext()
+    const { login, error, loading, verifyOTP, resendOTP } = useGlobalContext()
+    const [authMethod, setAuthMethod] = useState('email') // 'email' or 'phone'
+    const [step, setStep] = useState('login') // 'login', 'verify', 'forgot'
+    const [userId, setUserId] = useState(null)
     const [formData, setFormData] = useState({
         email: '',
-        password: ''
+        phone: '',
+        password: '',
+        otp: '',
+        newPassword: '',
+        confirmNewPassword: ''
     })
 
-    const { email, password } = formData
+    const { email, phone, password, otp, newPassword, confirmNewPassword } = formData
 
     const handleChange = (e) => {
         setFormData({
@@ -19,12 +26,238 @@ function Login({ switchToRegister }) {
         })
     }
 
-    const handleSubmit = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault()
-        const result = await login(formData)
-        if (result.success) {
-            setFormData({ email: '', password: '' })
+        const loginData = {
+            password,
+            ...(authMethod === 'email' ? { email } : { phone })
         }
+        
+        const result = await login(loginData)
+        if (result.success) {
+            setFormData({ email: '', phone: '', password: '', otp: '', newPassword: '', confirmNewPassword: '' })
+        } else if (result.needsVerification) {
+            setUserId(result.userId)
+            setStep('verify')
+        }
+    }
+
+    const handleVerifyOTP = async (e) => {
+        e.preventDefault()
+        const result = await verifyOTP({ userId, otp })
+        if (result.success) {
+            setFormData({ email: '', phone: '', password: '', otp: '', newPassword: '', confirmNewPassword: '' })
+            setStep('login')
+        }
+    }
+
+    const handleResendOTP = async () => {
+        await resendOTP({ userId })
+    }
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault()
+        const { forgotPassword } = useGlobalContext()
+        const forgotData = authMethod === 'email' ? { email } : { phone }
+        
+        const result = await forgotPassword(forgotData)
+        if (result.success) {
+            setUserId(result.userId)
+            setStep('reset')
+        }
+    }
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault()
+        if (newPassword !== confirmNewPassword) return
+        
+        const { resetPassword } = useGlobalContext()
+        const result = await resetPassword({ userId, otp, newPassword })
+        if (result.success) {
+            setFormData({ email: '', phone: '', password: '', otp: '', newPassword: '', confirmNewPassword: '' })
+            setStep('login')
+        }
+    }
+
+    if (step === 'verify') {
+        return (
+            <LoginStyled>
+                <div className="auth-container">
+                    <h2>Verify Your Account</h2>
+                    <p>Enter the OTP sent to your {authMethod}</p>
+                    
+                    {error && <div className="error">{error}</div>}
+                    
+                    <form onSubmit={handleVerifyOTP}>
+                        <div className="input-control">
+                            <input
+                                type="text"
+                                name="otp"
+                                value={otp}
+                                placeholder="Enter 6-digit OTP"
+                                onChange={handleChange}
+                                maxLength="6"
+                                required
+                            />
+                        </div>
+                        
+                        <Button
+                            name={loading ? 'Verifying...' : 'Verify OTP'}
+                            bPad={'1rem 2rem'}
+                            bRad={'10px'}
+                            bg={'var(--color-accent)'}
+                            color={'#fff'}
+                            disabled={loading}
+                        />
+                    </form>
+                    
+                    <div className="otp-actions">
+                        <span onClick={handleResendOTP} className="resend-link">
+                            Resend OTP
+                        </span>
+                        <span onClick={() => setStep('login')} className="back-link">
+                            Back to Login
+                        </span>
+                    </div>
+                </div>
+            </LoginStyled>
+        )
+    }
+
+    if (step === 'forgot') {
+        return (
+            <LoginStyled>
+                <div className="auth-container">
+                    <h2>Forgot Password</h2>
+                    <p>Enter your {authMethod} to receive OTP</p>
+                    
+                    <div className="auth-method-selector">
+                        <button
+                            type="button"
+                            className={authMethod === 'email' ? 'active' : ''}
+                            onClick={() => setAuthMethod('email')}
+                        >
+                            Email
+                        </button>
+                        <button
+                            type="button"
+                            className={authMethod === 'phone' ? 'active' : ''}
+                            onClick={() => setAuthMethod('phone')}
+                        >
+                            Phone
+                        </button>
+                    </div>
+                    
+                    {error && <div className="error">{error}</div>}
+                    
+                    <form onSubmit={handleForgotPassword}>
+                        {authMethod === 'email' ? (
+                            <div className="input-control">
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={email}
+                                    placeholder="Email"
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        ) : (
+                            <div className="input-control">
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={phone}
+                                    placeholder="Phone Number"
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        )}
+                        
+                        <Button
+                            name={loading ? 'Sending OTP...' : 'Send OTP'}
+                            bPad={'1rem 2rem'}
+                            bRad={'10px'}
+                            bg={'var(--color-accent)'}
+                            color={'#fff'}
+                            disabled={loading}
+                        />
+                    </form>
+                    
+                    <p className="switch-auth">
+                        Remember your password?{' '}
+                        <span onClick={() => setStep('login')}>Sign In</span>
+                    </p>
+                </div>
+            </LoginStyled>
+        )
+    }
+
+    if (step === 'reset') {
+        return (
+            <LoginStyled>
+                <div className="auth-container">
+                    <h2>Reset Password</h2>
+                    <p>Enter OTP and new password</p>
+                    
+                    {error && <div className="error">{error}</div>}
+                    {newPassword !== confirmNewPassword && confirmNewPassword && (
+                        <div className="error">Passwords do not match</div>
+                    )}
+                    
+                    <form onSubmit={handleResetPassword}>
+                        <div className="input-control">
+                            <input
+                                type="text"
+                                name="otp"
+                                value={otp}
+                                placeholder="Enter 6-digit OTP"
+                                onChange={handleChange}
+                                maxLength="6"
+                                required
+                            />
+                        </div>
+                        
+                        <div className="input-control">
+                            <input
+                                type="password"
+                                name="newPassword"
+                                value={newPassword}
+                                placeholder="New Password"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="input-control">
+                            <input
+                                type="password"
+                                name="confirmNewPassword"
+                                value={confirmNewPassword}
+                                placeholder="Confirm New Password"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        
+                        <Button
+                            name={loading ? 'Resetting...' : 'Reset Password'}
+                            bPad={'1rem 2rem'}
+                            bRad={'10px'}
+                            bg={'var(--color-accent)'}
+                            color={'#fff'}
+                            disabled={loading || newPassword !== confirmNewPassword}
+                        />
+                    </form>
+                    
+                    <p className="switch-auth">
+                        Remember your password?{' '}
+                        <span onClick={() => setStep('login')}>Sign In</span>
+                    </p>
+                </div>
+            </LoginStyled>
+        )
     }
 
     return (
@@ -33,20 +266,49 @@ function Login({ switchToRegister }) {
                 <h2>Welcome Back</h2>
                 <p>Sign in to your account</p>
                 
-                {error && <div className="error">{error}</div>}
-                }
+                <div className="auth-method-selector">
+                    <button
+                        type="button"
+                        className={authMethod === 'email' ? 'active' : ''}
+                        onClick={() => setAuthMethod('email')}
+                    >
+                        Email
+                    </button>
+                    <button
+                        type="button"
+                        className={authMethod === 'phone' ? 'active' : ''}
+                        onClick={() => setAuthMethod('phone')}
+                    >
+                        Phone
+                    </button>
+                </div>
                 
-                <form onSubmit={handleSubmit}>
-                    <div className="input-control">
-                        <input
-                            type="email"
-                            name="email"
-                            value={email}
-                            placeholder="Email"
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                {error && <div className="error">{error}</div>}
+                
+                <form onSubmit={handleLogin}>
+                    {authMethod === 'email' ? (
+                        <div className="input-control">
+                            <input
+                                type="email"
+                                name="email"
+                                value={email}
+                                placeholder="Email"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    ) : (
+                        <div className="input-control">
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={phone}
+                                placeholder="Phone Number"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    )}
                     
                     <div className="input-control">
                         <input
@@ -68,6 +330,10 @@ function Login({ switchToRegister }) {
                         disabled={loading}
                     />
                 </form>
+                
+                <p className="forgot-password">
+                    <span onClick={() => setStep('forgot')}>Forgot Password?</span>
+                </p>
                 
                 <p className="switch-auth">
                     Don't have an account?{' '}
@@ -104,6 +370,33 @@ const LoginStyled = styled.div`
         p {
             color: var(--primary-color2);
             margin-bottom: 2rem;
+        }
+        
+        .auth-method-selector {
+            display: flex;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e1e1e1;
+            
+            button {
+                flex: 1;
+                padding: 1rem;
+                border: none;
+                background: #f8f9fa;
+                color: #666;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                
+                &.active {
+                    background: var(--color-accent);
+                    color: white;
+                }
+                
+                &:hover:not(.active) {
+                    background: #e9ecef;
+                }
+            }
         }
         
         form {
@@ -144,11 +437,42 @@ const LoginStyled = styled.div`
             }
         }
         
+        .forgot-password {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            
+            span {
+                color: var(--color-accent);
+                cursor: pointer;
+                font-weight: 600;
+                
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+        
         .switch-auth {
             margin-top: 2rem;
             color: var(--primary-color);
             
             span {
+                color: var(--color-accent);
+                cursor: pointer;
+                font-weight: 600;
+                
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+        
+        .otp-actions {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            
+            .resend-link, .back-link {
                 color: var(--color-accent);
                 cursor: pointer;
                 font-weight: 600;

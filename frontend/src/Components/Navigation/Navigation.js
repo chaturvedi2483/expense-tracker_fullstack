@@ -14,7 +14,7 @@ function Navigation({active, setActive}) {
                 <img src={avatar} alt="" />
                 <div className="text">
                     <h2>{user?.name || 'User'}</h2>
-                    <p>Your Money</p>
+                    <p>{user?.email || user?.phone || 'Your Money'}</p>
                 </div>
             </div>
             <ul className="menu-items">
@@ -70,6 +70,8 @@ const NavStyled = styled.nav`
         }
         p{
             color: rgba(34, 34, 96, .6);
+            font-size: 0.9rem;
+            word-break: break-all;
         }
     }
 

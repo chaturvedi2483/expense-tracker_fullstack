@@ -34,7 +34,21 @@ export const GlobalProvider = ({children}) => {
     const register = async (userData) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${BASE_URL}auth/register`, userData);
+            const response = await axios.post(`${BASE_URL}register`, userData);
+            setError(null);
+            return { success: true, userId: response.data.userId };
+        } catch (err) {
+            setError(err.response?.data?.message || 'Registration failed');
+            return { success: false };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const verifyOTP = async (otpData) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${BASE_URL}verify-otp`, otpData);
             const { token: newToken, user: newUser } = response.data;
             
             localStorage.setItem('token', newToken);
@@ -43,7 +57,21 @@ export const GlobalProvider = ({children}) => {
             setError(null);
             return { success: true };
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            setError(err.response?.data?.message || 'OTP verification failed');
+            return { success: false };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resendOTP = async (userData) => {
+        setLoading(true);
+        try {
+            await axios.post(`${BASE_URL}resend-otp`, userData);
+            setError(null);
+            return { success: true };
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to resend OTP');
             return { success: false };
         } finally {
             setLoading(false);
@@ -53,7 +81,7 @@ export const GlobalProvider = ({children}) => {
     const login = async (credentials) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${BASE_URL}auth/login`, credentials);
+            const response = await axios.post(`${BASE_URL}login`, credentials);
             const { token: newToken, user: newUser } = response.data;
             
             localStorage.setItem('token', newToken);
@@ -62,7 +90,41 @@ export const GlobalProvider = ({children}) => {
             setError(null);
             return { success: true };
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed');
+            const errorData = err.response?.data;
+            setError(errorData?.message || 'Login failed');
+            
+            if (errorData?.needsVerification) {
+                return { success: false, needsVerification: true, userId: errorData.userId };
+            }
+            
+            return { success: false };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const forgotPassword = async (userData) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${BASE_URL}forgot-password`, userData);
+            setError(null);
+            return { success: true, userId: response.data.userId };
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to send reset OTP');
+            return { success: false };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetPassword = async (resetData) => {
+        setLoading(true);
+        try {
+            await axios.post(`${BASE_URL}reset-password`, resetData);
+            setError(null);
+            return { success: true };
+        } catch (err) {
+            setError(err.response?.data?.message || 'Password reset failed');
             return { success: false };
         } finally {
             setLoading(false);
@@ -76,12 +138,13 @@ export const GlobalProvider = ({children}) => {
         setIncomes([]);
         setExpenses([]);
         setError(null);
+        setEditingItem(null);
         delete axios.defaults.headers.common['Authorization'];
     };
 
     const getProfile = async () => {
         try {
-            const response = await axios.get(`${BASE_URL}auth/profile`);
+            const response = await axios.get(`${BASE_URL}profile`);
             setUser(response.data);
         } catch (err) {
             console.error('Failed to get profile:', err);
@@ -204,7 +267,11 @@ export const GlobalProvider = ({children}) => {
             token,
             loading,
             register,
+            verifyOTP,
+            resendOTP,
             login,
+            forgotPassword,
+            resetPassword,
             logout,
             
             // Income
