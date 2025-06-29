@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { dateFormat } from '../../utils/dateFormat';
-import { bitcoin, book, calender, card, circle, clothing, comment, dollar, food, freelance, medical, money, piggy, stocks, takeaway, trash, tv, users, yt } from '../../utils/Icons';
+import { bitcoin, book, calender, card, circle, clothing, comment, dollar, edit, food, freelance, medical, money, piggy, stocks, takeaway, trash, tv, users, yt } from '../../utils/Icons';
 import Button from '../Button/Button';
 
 function IncomeItem({
@@ -13,7 +13,8 @@ function IncomeItem({
     description,
     deleteItem,
     indicatorColor,
-    type
+    type,
+    onEdit
 }) {
 
     const categoryIcon = () =>{
@@ -62,8 +63,6 @@ function IncomeItem({
         }
     }
 
-    console.log('type', type)
-
     return (
         <IncomeItemStyled indicator={indicatorColor}>
             <div className="icon">
@@ -82,13 +81,27 @@ function IncomeItem({
                     </div>
                     <div className="btn-con">
                         <Button 
+                            icon={edit}
+                            bPad={'1rem'}
+                            bRad={'50%'}
+                            bg={'var(--color-accent)'}
+                            color={'#fff'}
+                            onClick={() => onEdit({
+                                id,
+                                title,
+                                amount,
+                                date,
+                                category,
+                                description,
+                                type
+                            })}
+                        />
+                        <Button 
                             icon={trash}
                             bPad={'1rem'}
                             bRad={'50%'}
-                            bg={'var(--primary-color'}
+                            bg={'var(--color-delete)'}
                             color={'#fff'}
-                            iColor={'#fff'}
-                            hColor={'var(--color-green)'}
                             onClick={() => deleteItem(id)}
                         />
                     </div>
@@ -161,6 +174,11 @@ const IncomeItemStyled = styled.div`
                     color: var(--primary-color);
                     opacity: 0.8;
                 }
+            }
+            
+            .btn-con{
+                display: flex;
+                gap: 0.5rem;
             }
         }
     }

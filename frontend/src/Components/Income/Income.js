@@ -6,11 +6,16 @@ import Form from '../Form/Form';
 import IncomeItem from '../IncomeItem/IncomeItem';
 
 function Income() {
-    const {addIncome,incomes, getIncomes, deleteIncome, totalIncome} = useGlobalContext()
+    const { incomes, getIncomes, deleteIncome, totalIncome, setEditingItem } = useGlobalContext()
 
-    useEffect(() =>{
+    useEffect(() => {
         getIncomes()
     }, [])
+
+    const handleEdit = (item) => {
+        setEditingItem(item)
+    }
+
     return (
         <IncomeStyled>
             <InnerLayout>
@@ -34,6 +39,7 @@ function Income() {
                                 category={category} 
                                 indicatorColor="var(--color-green)"
                                 deleteItem={deleteIncome}
+                                onEdit={handleEdit}
                             />
                         })}
                     </div>

@@ -1,15 +1,15 @@
 const ExpenseSchema = require("../models/ExpenseModel")
 
-
 exports.addExpense = async (req, res) => {
-    const {title, amount, category, description, date}  = req.body
+    const {title, amount, category, description, date} = req.body
 
-    const income = ExpenseSchema({
+    const expense = ExpenseSchema({
         title,
         amount,
         category,
         description,
-        date
+        date,
+        user: req.user.id
     })
 
     try {
@@ -17,34 +17,66 @@ exports.addExpense = async (req, res) => {
         if(!title || !category || !description || !date){
             return res.status(400).json({message: 'All fields are required!'})
         }
-        if(amount <= 0 || !amount === 'number'){
+        if(amount <= 0 || typeof amount !== 'number'){
             return res.status(400).json({message: 'Amount must be a positive number!'})
         }
-        await income.save()
+        await expense.save()
         res.status(200).json({message: 'Expense Added'})
     } catch (error) {
         res.status(500).json({message: 'Server Error'})
     }
-
-    console.log(income)
 }
 
-exports.getExpense = async (req, res) =>{
+exports.getExpense = async (req, res) => {
     try {
-        const incomes = await ExpenseSchema.find().sort({createdAt: -1})
-        res.status(200).json(incomes)
+        const expenses = await ExpenseSchema.find({ user: req.user.id }).sort({createdAt: -1})
+        res.status(200).json(expenses)
     } catch (error) {
         res.status(500).json({message: 'Server Error'})
     }
 }
 
-exports.deleteExpense = async (req, res) =>{
+exports.updateExpense = async (req, res) => {
+    const { id } = req.params;
+    const { title, amount, category, description, date } = req.body;
+
+    try {
+        // Validation
+        if (!title || !category || !description || !date) {
+            return res.status(400).json({ message: 'All fields are required!' });
+        }
+        if (amount <= 0 || typeof amount !== 'number') {
+            return res.status(400).json({ message: 'Amount must be a positive number!' });
+        }
+
+        const expense = await ExpenseSchema.findOneAndUpdate(
+            { _id: id, user: req.user.id },
+            { title, amount, category, description, date },
+            { new: true }
+        );
+
+        if (!expense) {
+            return res.status(404).json({ message: 'Expense not found' });
+        }
+
+        res.status(200).json({ message: 'Expense Updated', expense });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
+exports.deleteExpense = async (req, res) => {
     const {id} = req.params;
-    ExpenseSchema.findByIdAndDelete(id)
-        .then((income) =>{
-            res.status(200).json({message: 'Expense Deleted'})
-        })
-        .catch((err) =>{
-            res.status(500).json({message: 'Server Error'})
-        })
+    
+    try {
+        const expense = await ExpenseSchema.findOneAndDelete({ _id: id, user: req.user.id });
+        
+        if (!expense) {
+            return res.status(404).json({ message: 'Expense not found' });
+        }
+        
+        res.status(200).json({ message: 'Expense Deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
 }

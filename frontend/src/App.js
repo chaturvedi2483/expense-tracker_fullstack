@@ -1,19 +1,18 @@
-import React, {useState, useMemo} from 'react'
+import React, { useState, useMemo } from 'react'
 import styled from "styled-components";
 import bg from './img/bg.png'
-import {MainLayout} from './styles/Layouts'
+import { MainLayout } from './styles/Layouts'
 import Orb from './Components/Orb/Orb'
 import Navigation from './Components/Navigation/Navigation'
 import Dashboard from './Components/Dashboard/Dashboard';
 import Income from './Components/Income/Income'
 import Expenses from './Components/Expenses/Expenses';
+import AuthWrapper from './Components/Auth/AuthWrapper';
 import { useGlobalContext } from './context/globalContext';
 
 function App() {
   const [active, setActive] = useState(1)
-
-  const global = useGlobalContext()
-  console.log(global);
+  const { user } = useGlobalContext()
 
   const displayData = () => {
     switch(active){
@@ -33,6 +32,11 @@ function App() {
   const orbMemo = useMemo(() => {
     return <Orb />
   },[])
+
+  // Show auth wrapper if user is not logged in
+  if (!user) {
+    return <AuthWrapper />
+  }
 
   return (
     <AppStyled bg={bg} className="App">

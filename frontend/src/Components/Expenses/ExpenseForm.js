@@ -1,14 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 import { useGlobalContext } from '../../context/globalContext';
 import Button from '../Button/Button';
-import { plus } from '../../utils/Icons';
-
+import { plus, edit as editIcon } from '../../utils/Icons';
 
 function ExpenseForm() {
-    const {addExpense, error, setError} = useGlobalContext()
+    const { addExpense, updateExpense, error, setError, editingItem, setEditingItem } = useGlobalContext()
     const [inputState, setInputState] = useState({
         title: '',
         amount: '',
@@ -17,7 +16,20 @@ function ExpenseForm() {
         description: '',
     })
 
-    const { title, amount, date, category,description } = inputState;
+    const { title, amount, date, category, description } = inputState;
+
+    // Populate form when editing
+    useEffect(() => {
+        if (editingItem && editingItem.type === 'expense') {
+            setInputState({
+                title: editingItem.title,
+                amount: editingItem.amount,
+                date: new Date(editingItem.date),
+                category: editingItem.category,
+                description: editingItem.description,
+            })
+        }
+    }, [editingItem])
 
     const handleInput = name => e => {
         setInputState({...inputState, [name]: e.target.value})
@@ -26,7 +38,18 @@ function ExpenseForm() {
 
     const handleSubmit = e => {
         e.preventDefault()
-        addExpense(inputState)
+        
+        const formData = {
+            ...inputState,
+            amount: parseFloat(amount)
+        }
+        
+        if (editingItem && editingItem.type === 'expense') {
+            updateExpense(editingItem.id, formData)
+        } else {
+            addExpense(formData)
+        }
+        
         setInputState({
             title: '',
             amount: '',
@@ -35,6 +58,20 @@ function ExpenseForm() {
             description: '',
         })
     }
+
+    const handleCancel = () => {
+        setEditingItem(null)
+        setInputState({
+            title: '',
+            amount: '',
+            date: '',
+            category: '',
+            description: '',
+        })
+        setError('')
+    }
+
+    const isEditing = editingItem && editingItem.type === 'expense'
 
     return (
         <ExpenseFormStyled onSubmit={handleSubmit}>
@@ -50,7 +87,7 @@ function ExpenseForm() {
             </div>
             <div className="input-control">
                 <input value={amount}  
-                    type="text" 
+                    type="number" 
                     name={'amount'} 
                     placeholder={'Expense Amount'}
                     onChange={handleInput('amount')} 
@@ -69,7 +106,7 @@ function ExpenseForm() {
             </div>
             <div className="selects input-control">
                 <select required value={category} name="category" id="category" onChange={handleInput('category')}>
-                    <option value="" disabled >Select Option</option>
+                    <option value="" disabled>Select Option</option>
                     <option value="education">Education</option>
                     <option value="groceries">Groceries</option>
                     <option value="health">Health</option>
@@ -85,18 +122,27 @@ function ExpenseForm() {
             </div>
             <div className="submit-btn">
                 <Button 
-                    name={'Add Expense'}
-                    icon={plus}
+                    name={isEditing ? 'Update Expense' : 'Add Expense'}
+                    icon={isEditing ? editIcon : plus}
                     bPad={'.8rem 1.6rem'}
                     bRad={'30px'}
-                    bg={'var(--color-accent'}
+                    bg={'var(--color-accent)'}
                     color={'#fff'}
                 />
+                {isEditing && (
+                    <Button 
+                        name={'Cancel'}
+                        bPad={'.8rem 1.6rem'}
+                        bRad={'30px'}
+                        bg={'var(--color-grey)'}
+                        color={'#fff'}
+                        onClick={handleCancel}
+                    />
+                )}
             </div>
         </ExpenseFormStyled>
     )
 }
-
 
 const ExpenseFormStyled = styled.form`
     display: flex;
@@ -136,6 +182,8 @@ const ExpenseFormStyled = styled.form`
     }
 
     .submit-btn{
+        display: flex;
+        gap: 1rem;
         button{
             box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
             &:hover{
@@ -144,4 +192,5 @@ const ExpenseFormStyled = styled.form`
         }
     }
 `;
+
 export default ExpenseForm

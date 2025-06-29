@@ -1,14 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 import { useGlobalContext } from '../../context/globalContext';
 import Button from '../Button/Button';
-import { plus } from '../../utils/Icons';
-
+import { plus, edit as editIcon } from '../../utils/Icons';
 
 function Form() {
-    const {addIncome, getIncomes, error, setError} = useGlobalContext()
+    const { addIncome, updateIncome, error, setError, editingItem, setEditingItem } = useGlobalContext()
     const [inputState, setInputState] = useState({
         title: '',
         amount: '',
@@ -17,7 +16,20 @@ function Form() {
         description: '',
     })
 
-    const { title, amount, date, category,description } = inputState;
+    const { title, amount, date, category, description } = inputState;
+
+    // Populate form when editing
+    useEffect(() => {
+        if (editingItem && editingItem.type === 'income') {
+            setInputState({
+                title: editingItem.title,
+                amount: editingItem.amount,
+                date: new Date(editingItem.date),
+                category: editingItem.category,
+                description: editingItem.description,
+            })
+        }
+    }, [editingItem])
 
     const handleInput = name => e => {
         setInputState({...inputState, [name]: e.target.value})
@@ -26,7 +38,18 @@ function Form() {
 
     const handleSubmit = e => {
         e.preventDefault()
-        addIncome(inputState)
+        
+        const formData = {
+            ...inputState,
+            amount: parseFloat(amount)
+        }
+        
+        if (editingItem && editingItem.type === 'income') {
+            updateIncome(editingItem.id, formData)
+        } else {
+            addIncome(formData)
+        }
+        
         setInputState({
             title: '',
             amount: '',
@@ -35,6 +58,20 @@ function Form() {
             description: '',
         })
     }
+
+    const handleCancel = () => {
+        setEditingItem(null)
+        setInputState({
+            title: '',
+            amount: '',
+            date: '',
+            category: '',
+            description: '',
+        })
+        setError('')
+    }
+
+    const isEditing = editingItem && editingItem.type === 'income'
 
     return (
         <FormStyled onSubmit={handleSubmit}>
@@ -50,7 +87,7 @@ function Form() {
             </div>
             <div className="input-control">
                 <input value={amount}  
-                    type="text" 
+                    type="number" 
                     name={'amount'} 
                     placeholder={'Salary Amount'}
                     onChange={handleInput('amount')} 
@@ -69,10 +106,10 @@ function Form() {
             </div>
             <div className="selects input-control">
                 <select required value={category} name="category" id="category" onChange={handleInput('category')}>
-                    <option value=""  disabled >Select Option</option>
+                    <option value="" disabled>Select Option</option>
                     <option value="salary">Salary</option>
                     <option value="freelancing">Freelancing</option>
-                    <option value="investments">Investiments</option>
+                    <option value="investments">Investments</option>
                     <option value="stocks">Stocks</option>
                     <option value="bitcoin">Bitcoin</option>
                     <option value="bank">Bank Transfer</option>  
@@ -85,18 +122,27 @@ function Form() {
             </div>
             <div className="submit-btn">
                 <Button 
-                    name={'Add Income'}
-                    icon={plus}
+                    name={isEditing ? 'Update Income' : 'Add Income'}
+                    icon={isEditing ? editIcon : plus}
                     bPad={'.8rem 1.6rem'}
                     bRad={'30px'}
-                    bg={'var(--color-accent'}
+                    bg={'var(--color-accent)'}
                     color={'#fff'}
                 />
+                {isEditing && (
+                    <Button 
+                        name={'Cancel'}
+                        bPad={'.8rem 1.6rem'}
+                        bRad={'30px'}
+                        bg={'var(--color-grey)'}
+                        color={'#fff'}
+                        onClick={handleCancel}
+                    />
+                )}
             </div>
         </FormStyled>
     )
 }
-
 
 const FormStyled = styled.form`
     display: flex;
@@ -136,6 +182,8 @@ const FormStyled = styled.form`
     }
 
     .submit-btn{
+        display: flex;
+        gap: 1rem;
         button{
             box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
             &:hover{
@@ -144,4 +192,5 @@ const FormStyled = styled.form`
         }
     }
 `;
+
 export default Form
