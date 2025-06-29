@@ -85,6 +85,7 @@ function Form() {
     return (
         <FormStyled onSubmit={handleSubmit}>
             {error && <p className='error'>{error}</p>}
+            }
             <div className="form-header">
                 <h3>{isEditing ? 'Update Income' : 'Add New Income'}</h3>
             </div>
