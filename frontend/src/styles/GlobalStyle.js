@@ -50,4 +50,38 @@ export const GlobalStyle = createGlobalStyle`
             }
         }
     }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-accent);
+        border-radius: 10px;
+        opacity: 0.7;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+    
+    /* Smooth transitions for all elements */
+    * {
+        transition: all 0.3s ease;
+    }
+    
+    /* Focus styles for accessibility */
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
 `;

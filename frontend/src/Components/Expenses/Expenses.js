@@ -14,6 +14,11 @@ function Expenses() {
 
     const handleEdit = (item) => {
         setEditingItem(item)
+        // Scroll to form when editing
+        const formContainer = document.querySelector('.form-container');
+        if (formContainer) {
+            formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     return (
@@ -26,22 +31,28 @@ function Expenses() {
                         <ExpenseForm />
                     </div>
                     <div className="incomes">
-                        {expenses.map((expense) => {
-                            const {_id, title, amount, date, category, description, type} = expense;
-                            return <IncomeItem
-                                key={_id}
-                                id={_id} 
-                                title={title} 
-                                description={description} 
-                                amount={amount} 
-                                date={date} 
-                                type={type}
-                                category={category} 
-                                indicatorColor="var(--color-green)"
-                                deleteItem={deleteExpense}
-                                onEdit={handleEdit}
-                            />
-                        })}
+                        {expenses.length === 0 ? (
+                            <div className="no-data">
+                                <p>No expense records found. Add your first expense!</p>
+                            </div>
+                        ) : (
+                            expenses.map((expense) => {
+                                const {_id, title, amount, date, category, description, type} = expense;
+                                return <IncomeItem
+                                    key={_id}
+                                    id={_id} 
+                                    title={title} 
+                                    description={description} 
+                                    amount={amount} 
+                                    date={date} 
+                                    type={type}
+                                    category={category} 
+                                    indicatorColor="var(--color-delete)"
+                                    deleteItem={deleteExpense}
+                                    onEdit={handleEdit}
+                                />
+                            })
+                        )}
                     </div>
                 </div>
             </InnerLayout>
@@ -67,7 +78,7 @@ const ExpenseStyled = styled.div`
         span{
             font-size: 2.5rem;
             font-weight: 800;
-            color: var(--color-green);
+            color: var(--color-delete);
         }
     }
     .income-content{
@@ -75,6 +86,21 @@ const ExpenseStyled = styled.div`
         gap: 2rem;
         .incomes{
             flex: 1;
+        }
+        
+        .no-data {
+            background: #FCF6F9;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            
+            p {
+                color: var(--primary-color);
+                font-size: 1.1rem;
+                opacity: 0.7;
+            }
         }
     }
 `;

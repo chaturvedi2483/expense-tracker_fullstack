@@ -14,6 +14,11 @@ function Income() {
 
     const handleEdit = (item) => {
         setEditingItem(item)
+        // Scroll to form when editing
+        const formContainer = document.querySelector('.form-container');
+        if (formContainer) {
+            formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     return (
@@ -26,22 +31,28 @@ function Income() {
                         <Form />
                     </div>
                     <div className="incomes">
-                        {incomes.map((income) => {
-                            const {_id, title, amount, date, category, description, type} = income;
-                            return <IncomeItem
-                                key={_id}
-                                id={_id} 
-                                title={title} 
-                                description={description} 
-                                amount={amount} 
-                                date={date} 
-                                type={type}
-                                category={category} 
-                                indicatorColor="var(--color-green)"
-                                deleteItem={deleteIncome}
-                                onEdit={handleEdit}
-                            />
-                        })}
+                        {incomes.length === 0 ? (
+                            <div className="no-data">
+                                <p>No income records found. Add your first income!</p>
+                            </div>
+                        ) : (
+                            incomes.map((income) => {
+                                const {_id, title, amount, date, category, description, type} = income;
+                                return <IncomeItem
+                                    key={_id}
+                                    id={_id} 
+                                    title={title} 
+                                    description={description} 
+                                    amount={amount} 
+                                    date={date} 
+                                    type={type}
+                                    category={category} 
+                                    indicatorColor="var(--color-green)"
+                                    deleteItem={deleteIncome}
+                                    onEdit={handleEdit}
+                                />
+                            })
+                        )}
                     </div>
                 </div>
             </InnerLayout>
@@ -75,6 +86,21 @@ const IncomeStyled = styled.div`
         gap: 2rem;
         .incomes{
             flex: 1;
+        }
+        
+        .no-data {
+            background: #FCF6F9;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            
+            p {
+                color: var(--primary-color);
+                font-size: 1.1rem;
+                opacity: 0.7;
+            }
         }
     }
 `;
