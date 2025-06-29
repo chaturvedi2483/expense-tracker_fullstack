@@ -7,12 +7,9 @@ import Navigation from './Components/Navigation/Navigation'
 import Dashboard from './Components/Dashboard/Dashboard';
 import Income from './Components/Income/Income'
 import Expenses from './Components/Expenses/Expenses';
-import AuthWrapper from './Components/Auth/AuthWrapper';
-import { useGlobalContext } from './context/globalContext';
 
 function App() {
   const [active, setActive] = useState(1)
-  const { user } = useGlobalContext()
 
   const displayData = () => {
     switch(active){
@@ -32,11 +29,6 @@ function App() {
   const orbMemo = useMemo(() => {
     return <Orb />
   },[])
-
-  // Show auth wrapper if user is not logged in
-  if (!user) {
-    return <AuthWrapper />
-  }
 
   return (
     <AppStyled bg={bg} className="App">

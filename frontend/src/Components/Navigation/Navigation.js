@@ -1,20 +1,17 @@
 import React from 'react'
 import styled from 'styled-components'
 import avatar from '../../img/avatar.png'
-import { signout } from '../../utils/Icons'
 import { menuItems } from '../../utils/menuItems'
-import { useGlobalContext } from '../../context/globalContext'
 
 function Navigation({active, setActive}) {
-    const { user, logout } = useGlobalContext()
     
     return (
         <NavStyled>
             <div className="user-con">
                 <img src={avatar} alt="" />
                 <div className="text">
-                    <h2>{user?.name || 'User'}</h2>
-                    <p>{user?.email || user?.phone || 'Your Money'}</p>
+                    <h2>Expense Tracker</h2>
+                    <p>Manage Your Money</p>
                 </div>
             </div>
             <ul className="menu-items">
@@ -29,11 +26,6 @@ function Navigation({active, setActive}) {
                     </li>
                 })}
             </ul>
-            <div className="bottom-nav">
-                <li onClick={logout}>
-                    {signout} Sign Out
-                </li>
-            </div>
         </NavStyled>
     )
 }
@@ -71,7 +63,6 @@ const NavStyled = styled.nav`
         p{
             color: rgba(34, 34, 96, .6);
             font-size: 0.9rem;
-            word-break: break-all;
         }
     }
 
@@ -79,26 +70,6 @@ const NavStyled = styled.nav`
         flex: 1;
         display: flex;
         flex-direction: column;
-        li{
-            display: grid;
-            grid-template-columns: 40px auto;
-            align-items: center;
-            margin: .6rem 0;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all .4s ease-in-out;
-            color: rgba(34, 34, 96, .6);
-            padding-left: 1rem;
-            position: relative;
-            i{
-                color: rgba(34, 34, 96, 0.6);
-                font-size: 1.4rem;
-                transition: all .4s ease-in-out;
-            }
-        }
-    }
-
-    .bottom-nav{
         li{
             display: grid;
             grid-template-columns: 40px auto;
