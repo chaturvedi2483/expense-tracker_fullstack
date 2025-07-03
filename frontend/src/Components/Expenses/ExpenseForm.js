@@ -88,6 +88,7 @@ function ExpenseForm() {
     return (
         <ExpenseFormStyled onSubmit={handleSubmit}>
             {error && <p className='error'>{error}</p>}
+            }
             <div className="form-header">
                 <h3>{isEditing ? 'Update Expense' : 'Add New Expense'}</h3>
             </div>
