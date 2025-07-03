@@ -2,15 +2,23 @@ import React from 'react'
 import styled from 'styled-components'
 import avatar from '../../img/avatar.png'
 import { menuItems } from '../../utils/menuItems'
+import { signout } from '../../utils/Icons'
+import Button from '../Button/Button'
 
-function Navigation({active, setActive}) {
+function Navigation({active, setActive, user, onLogout}) {
+    
+    const handleLogout = () => {
+        if (window.confirm('Are you sure you want to logout?')) {
+            onLogout()
+        }
+    }
     
     return (
         <NavStyled>
             <div className="user-con">
                 <img src={avatar} alt="" />
                 <div className="text">
-                    <h2>Expense Tracker</h2>
+                    <h2>Welcome, {user?.name}</h2>
                     <p>Manage Your Money</p>
                 </div>
             </div>
@@ -26,6 +34,17 @@ function Navigation({active, setActive}) {
                     </li>
                 })}
             </ul>
+            <div className="logout-con">
+                <Button 
+                    name="Logout"
+                    icon={signout}
+                    bPad={'0.8rem 1.5rem'}
+                    bRad={'10px'}
+                    bg={'var(--color-delete)'}
+                    color={'#fff'}
+                    onClick={handleLogout}
+                />
+            </div>
         </NavStyled>
     )
 }
@@ -42,6 +61,7 @@ const NavStyled = styled.nav`
     flex-direction: column;
     justify-content: space-between;
     gap: 2rem;
+    
     .user-con{
         height: 100px;
         display: flex;
@@ -59,6 +79,7 @@ const NavStyled = styled.nav`
         }
         h2{
             color: rgba(34, 34, 96, 1);
+            font-size: 1.2rem;
         }
         p{
             color: rgba(34, 34, 96, .6);
@@ -110,6 +131,21 @@ const NavStyled = styled.nav`
             height: 100%;
             background: #222260;
             border-radius: 0 10px 10px 0;
+        }
+    }
+    
+    .logout-con {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(34, 34, 96, 0.1);
+        
+        button {
+            width: 100%;
+            justify-content: center;
+            font-weight: 600;
+            
+            &:hover {
+                background: #cc0000 !important;
+            }
         }
     }
 `;

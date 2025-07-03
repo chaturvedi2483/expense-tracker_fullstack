@@ -7,7 +7,7 @@ import Button from '../Button/Button';
 import { plus, edit as editIcon } from '../../utils/Icons';
 
 function Form() {
-    const { addIncome, updateIncome, error, setError, editingItem, setEditingItem } = useGlobalContext()
+    const { addIncome, updateIncome, error, setError, editingItem, setEditingItem, loading } = useGlobalContext()
     const [inputState, setInputState] = useState({
         title: '',
         amount: '',
@@ -45,7 +45,7 @@ function Form() {
         setError('')
     }
 
-    const handleSubmit = e => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         
         const formData = {
@@ -53,19 +53,22 @@ function Form() {
             amount: parseFloat(amount)
         }
         
+        let result
         if (editingItem && editingItem.type === 'income') {
-            updateIncome(editingItem.id, formData)
+            result = await updateIncome(editingItem.id, formData)
         } else {
-            addIncome(formData)
+            result = await addIncome(formData)
         }
         
-        setInputState({
-            title: '',
-            amount: '',
-            date: '',
-            category: '',
-            description: '',
-        })
+        if (result.success) {
+            setInputState({
+                title: '',
+                amount: '',
+                date: '',
+                category: '',
+                description: '',
+            })
+        }
     }
 
     const handleCancel = () => {
@@ -85,7 +88,6 @@ function Form() {
     return (
         <FormStyled onSubmit={handleSubmit}>
             {error && <p className='error'>{error}</p>}
-            }
             <div className="form-header">
                 <h3>{isEditing ? 'Update Income' : 'Add New Income'}</h3>
             </div>
@@ -97,6 +99,7 @@ function Form() {
                     placeholder="Income Title"
                     onChange={handleInput('title')}
                     required
+                    disabled={loading}
                 />
             </div>
             <div className="input-control">
@@ -108,6 +111,7 @@ function Form() {
                     required
                     min="0"
                     step="0.01"
+                    disabled={loading}
                 />
             </div>
             <div className="input-control">
@@ -120,10 +124,18 @@ function Form() {
                         setInputState({...inputState, date: date})
                     }}
                     required
+                    disabled={loading}
                 />
             </div>
             <div className="selects input-control">
-                <select required value={category} name="category" id="category" onChange={handleInput('category')}>
+                <select 
+                    required 
+                    value={category} 
+                    name="category" 
+                    id="category" 
+                    onChange={handleInput('category')}
+                    disabled={loading}
+                >
                     <option value="" disabled>Select Category</option>
                     <option value="salary">Salary</option>
                     <option value="freelancing">Freelancing</option>
@@ -145,16 +157,19 @@ function Form() {
                     rows="4" 
                     onChange={handleInput('description')}
                     required
+                    disabled={loading}
                 ></textarea>
             </div>
             <div className="submit-btn">
                 <Button 
-                    name={isEditing ? 'Update Income' : 'Add Income'}
+                    name={loading ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Income' : 'Add Income')}
                     icon={isEditing ? editIcon : plus}
                     bPad={'.8rem 1.6rem'}
                     bRad={'30px'}
                     bg={'var(--color-accent)'}
                     color={'#fff'}
+                    disabled={loading}
+                    type="submit"
                 />
                 {isEditing && (
                     <Button 
@@ -164,6 +179,8 @@ function Form() {
                         bg={'var(--color-grey)'}
                         color={'#fff'}
                         onClick={handleCancel}
+                        disabled={loading}
+                        type="button"
                     />
                 )}
             </div>
@@ -209,6 +226,12 @@ const FormStyled = styled.form`
             border-color: var(--color-accent);
             box-shadow: 0px 1px 15px rgba(245, 102, 146, 0.2);
         }
+        
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
     }
     
     .input-control{
@@ -238,7 +261,7 @@ const FormStyled = styled.form`
             box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
             transition: all 0.3s ease;
             
-            &:hover{
+            &:hover:not(:disabled){
                 background: var(--color-green) !important;
                 transform: translateY(-2px);
             }
