@@ -11,147 +11,19 @@ export const GlobalProvider = ({children}) => {
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
     const [editingItem, setEditingItem] = useState(null)
-    const [user, setUser] = useState(null)
-    const [token, setToken] = useState(localStorage.getItem('token'))
-
-    // Set up axios defaults
-    if (token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-    }
-
-    // Auth functions
-    const register = async (userData) => {
-        setLoading(true)
-        setError(null)
-        try {
-            const response = await axios.post(`${BASE_URL}register`, userData)
-            setLoading(false)
-            return { 
-                success: true, 
-                userId: response.data.userId,
-                message: response.data.message 
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed')
-            setLoading(false)
-            return { success: false }
-        }
-    }
-
-    const verifyOTP = async (otpData) => {
-        setLoading(true)
-        setError(null)
-        try {
-            const response = await axios.post(`${BASE_URL}verify-otp`, otpData)
-            const { token, user } = response.data
-            
-            localStorage.setItem('token', token)
-            setToken(token)
-            setUser(user)
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-            
-            setLoading(false)
-            return { success: true }
-        } catch (err) {
-            setError(err.response?.data?.message || 'OTP verification failed')
-            setLoading(false)
-            return { success: false }
-        }
-    }
-
-    const resendOTP = async (userData) => {
-        setLoading(true)
-        setError(null)
-        try {
-            await axios.post(`${BASE_URL}resend-otp`, userData)
-            setLoading(false)
-            return { success: true }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to resend OTP')
-            setLoading(false)
-            return { success: false }
-        }
-    }
-
-    const login = async (userData) => {
-        setLoading(true)
-        setError(null)
-        try {
-            const response = await axios.post(`${BASE_URL}login`, userData)
-            
-            if (response.data.needsVerification) {
-                setLoading(false)
-                return { 
-                    success: false, 
-                    needsVerification: true,
-                    userId: response.data.userId 
-                }
-            }
-            
-            const { token, user } = response.data
-            localStorage.setItem('token', token)
-            setToken(token)
-            setUser(user)
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-            
-            setLoading(false)
-            return { success: true }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Login failed')
-            setLoading(false)
-            return { success: false }
-        }
-    }
-
-    const forgotPassword = async (userData) => {
-        setLoading(true)
-        setError(null)
-        try {
-            const response = await axios.post(`${BASE_URL}forgot-password`, userData)
-            setLoading(false)
-            return { 
-                success: true, 
-                userId: response.data.userId 
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to send reset OTP')
-            setLoading(false)
-            return { success: false }
-        }
-    }
-
-    const resetPassword = async (resetData) => {
-        setLoading(true)
-        setError(null)
-        try {
-            await axios.post(`${BASE_URL}reset-password`, resetData)
-            setLoading(false)
-            return { success: true }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Password reset failed')
-            setLoading(false)
-            return { success: false }
-        }
-    }
-
-    const logout = () => {
-        localStorage.removeItem('token')
-        setToken(null)
-        setUser(null)
-        setIncomes([])
-        setExpenses([])
-        delete axios.defaults.headers.common['Authorization']
-    }
 
     // Income functions
     const addIncome = async (income) => {
+        setLoading(true)
         setError(null)
         try {
             const response = await axios.post(`${BASE_URL}add-income`, income)
             await getIncomes()
+            setLoading(false)
             return { success: true }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add income')
+            setLoading(false)
             return { success: false }
         }
     }
@@ -166,14 +38,17 @@ export const GlobalProvider = ({children}) => {
     }
 
     const updateIncome = async (id, incomeData) => {
+        setLoading(true)
         setError(null)
         try {
             await axios.put(`${BASE_URL}update-income/${id}`, incomeData)
             await getIncomes()
             setEditingItem(null)
+            setLoading(false)
             return { success: true }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update income')
+            setLoading(false)
             return { success: false }
         }
     }
@@ -198,13 +73,16 @@ export const GlobalProvider = ({children}) => {
 
     // Expense functions
     const addExpense = async (expense) => {
+        setLoading(true)
         setError(null)
         try {
             await axios.post(`${BASE_URL}add-expense`, expense)
             await getExpenses()
+            setLoading(false)
             return { success: true }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add expense')
+            setLoading(false)
             return { success: false }
         }
     }
@@ -219,14 +97,17 @@ export const GlobalProvider = ({children}) => {
     }
 
     const updateExpense = async (id, expenseData) => {
+        setLoading(true)
         setError(null)
         try {
             await axios.put(`${BASE_URL}update-expense/${id}`, expenseData)
             await getExpenses()
             setEditingItem(null)
+            setLoading(false)
             return { success: true }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update expense')
+            setLoading(false)
             return { success: false }
         }
     }
@@ -263,17 +144,6 @@ export const GlobalProvider = ({children}) => {
 
     return (
         <GlobalContext.Provider value={{
-            // Auth
-            register,
-            verifyOTP,
-            resendOTP,
-            login,
-            forgotPassword,
-            resetPassword,
-            logout,
-            user,
-            token,
-            
             // Income
             addIncome,
             getIncomes,

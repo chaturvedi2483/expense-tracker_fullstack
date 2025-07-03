@@ -8,8 +8,7 @@ exports.addExpense = async (req, res) => {
         amount,
         category,
         description,
-        date,
-        user: req.user.id
+        date
     })
 
     try {
@@ -29,7 +28,7 @@ exports.addExpense = async (req, res) => {
 
 exports.getExpense = async (req, res) => {
     try {
-        const expenses = await ExpenseSchema.find({ user: req.user.id }).sort({createdAt: -1})
+        const expenses = await ExpenseSchema.find({}).sort({createdAt: -1})
         res.status(200).json(expenses)
     } catch (error) {
         res.status(500).json({message: 'Server Error'})
@@ -49,8 +48,8 @@ exports.updateExpense = async (req, res) => {
             return res.status(400).json({ message: 'Amount must be a positive number!' });
         }
 
-        const expense = await ExpenseSchema.findOneAndUpdate(
-            { _id: id, user: req.user.id },
+        const expense = await ExpenseSchema.findByIdAndUpdate(
+            id,
             { title, amount, category, description, date },
             { new: true }
         );
@@ -69,7 +68,7 @@ exports.deleteExpense = async (req, res) => {
     const {id} = req.params;
     
     try {
-        const expense = await ExpenseSchema.findOneAndDelete({ _id: id, user: req.user.id });
+        const expense = await ExpenseSchema.findByIdAndDelete(id);
         
         if (!expense) {
             return res.status(404).json({ message: 'Expense not found' });

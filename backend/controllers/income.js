@@ -8,8 +8,7 @@ exports.addIncome = async (req, res) => {
         amount,
         category,
         description,
-        date,
-        user: req.user.id
+        date
     })
 
     try {
@@ -29,7 +28,7 @@ exports.addIncome = async (req, res) => {
 
 exports.getIncomes = async (req, res) => {
     try {
-        const incomes = await IncomeSchema.find({ user: req.user.id }).sort({createdAt: -1})
+        const incomes = await IncomeSchema.find({}).sort({createdAt: -1})
         res.status(200).json(incomes)
     } catch (error) {
         res.status(500).json({message: 'Server Error'})
@@ -49,8 +48,8 @@ exports.updateIncome = async (req, res) => {
             return res.status(400).json({ message: 'Amount must be a positive number!' });
         }
 
-        const income = await IncomeSchema.findOneAndUpdate(
-            { _id: id, user: req.user.id },
+        const income = await IncomeSchema.findByIdAndUpdate(
+            id,
             { title, amount, category, description, date },
             { new: true }
         );
@@ -69,7 +68,7 @@ exports.deleteIncome = async (req, res) => {
     const {id} = req.params;
     
     try {
-        const income = await IncomeSchema.findOneAndDelete({ _id: id, user: req.user.id });
+        const income = await IncomeSchema.findByIdAndDelete(id);
         
         if (!income) {
             return res.status(404).json({ message: 'Income not found' });
