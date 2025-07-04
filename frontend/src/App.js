@@ -31,11 +31,11 @@ function App() {
   },[])
 
   return (
-    <AppStyled bg={bg} className="App">
+    <AppStyled className="App">
       {orbMemo}
       <MainLayout>
         <Navigation active={active} setActive={setActive} />
-        <main>
+        <main className="fade-in">
           {displayData()}
         </main>
       </MainLayout>
@@ -44,16 +44,30 @@ function App() {
 }
 
 const AppStyled = styled.div`
-  height: 100vh;
-  background-image: url(${props => props.bg});
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
+  
   main{
     flex: 1;
-    background: rgba(252, 246, 249, 0.78);
-    border: 3px solid #FFFFFF;
-    backdrop-filter: blur(4.5px);
-    border-radius: 32px;
-    overflow-x: hidden;
+    background: var(--background-card);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    }
+    
     &::-webkit-scrollbar{
       width: 0;
     }

@@ -86,99 +86,132 @@ function ExpenseForm() {
     const isEditing = editingItem && editingItem.type === 'expense'
 
     return (
-        <ExpenseFormStyled onSubmit={handleSubmit}>
-            {error && <p className='error'>{error}</p>}
-            }
+        <ExpenseFormStyled onSubmit={handleSubmit} className="glass">
             <div className="form-header">
+                <div className="form-icon">
+                    <i className="fa-solid fa-minus-circle"></i>
+                </div>
                 <h3>{isEditing ? 'Update Expense' : 'Add New Expense'}</h3>
+                <p>{isEditing ? 'Modify your expense details' : 'Track your spending and expenses'}</p>
             </div>
-            <div className="input-control">
-                <input 
-                    type="text" 
-                    value={title}
-                    name={'title'} 
-                    placeholder="Expense Title"
-                    onChange={handleInput('title')}
-                    required
-                    disabled={loading}
-                />
+
+            {error && <div className="error">{error}</div>}
+
+            <div className="form-grid">
+                <div className="input-group">
+                    <label htmlFor="title">Expense Title</label>
+                    <div className="input-wrapper">
+                        <i className="fa-solid fa-tag input-icon"></i>
+                        <input 
+                            id="title"
+                            type="text" 
+                            value={title}
+                            name={'title'} 
+                            placeholder="e.g., Groceries, Gas, Coffee"
+                            onChange={handleInput('title')}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+                </div>
+
+                <div className="input-group">
+                    <label htmlFor="amount">Amount</label>
+                    <div className="input-wrapper">
+                        <i className="fa-solid fa-dollar-sign input-icon"></i>
+                        <input 
+                            id="amount"
+                            value={amount}  
+                            type="number" 
+                            name={'amount'} 
+                            placeholder={'0.00'}
+                            onChange={handleInput('amount')} 
+                            required
+                            min="0"
+                            step="0.01"
+                            disabled={loading}
+                        />
+                    </div>
+                </div>
+
+                <div className="input-group">
+                    <label htmlFor="date">Date</label>
+                    <div className="input-wrapper date-wrapper">
+                        <i className="fa-solid fa-calendar input-icon"></i>
+                        <DatePicker 
+                            id='date'
+                            placeholderText='Select Date'
+                            selected={date}
+                            dateFormat="dd/MM/yyyy"
+                            onChange={(date) => {
+                                setInputState({...inputState, date: date})
+                            }}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+                </div>
+
+                <div className="input-group">
+                    <label htmlFor="category">Category</label>
+                    <div className="input-wrapper">
+                        <i className="fa-solid fa-list input-icon"></i>
+                        <select 
+                            id="category"
+                            required 
+                            value={category} 
+                            name="category" 
+                            onChange={handleInput('category')}
+                            disabled={loading}
+                        >
+                            <option value="" disabled>Choose a category</option>
+                            <option value="education">📚 Education</option>
+                            <option value="groceries">🛒 Groceries</option>
+                            <option value="health">🏥 Health</option>
+                            <option value="subscriptions">📱 Subscriptions</option>
+                            <option value="takeaways">🍕 Takeaways</option>
+                            <option value="clothing">👕 Clothing</option>  
+                            <option value="travelling">✈️ Travelling</option>  
+                            <option value="other">🔄 Other</option>  
+                        </select>
+                    </div>
+                </div>
+
+                <div className="input-group full-width">
+                    <label htmlFor="description">Description</label>
+                    <div className="input-wrapper">
+                        <i className="fa-solid fa-comment input-icon"></i>
+                        <textarea 
+                            id="description"
+                            name="description" 
+                            value={description} 
+                            placeholder='Add a detailed description...' 
+                            cols="30" 
+                            rows="3" 
+                            onChange={handleInput('description')}
+                            required
+                            disabled={loading}
+                        ></textarea>
+                    </div>
+                </div>
             </div>
-            <div className="input-control">
-                <input value={amount}  
-                    type="number" 
-                    name={'amount'} 
-                    placeholder={'Expense Amount'}
-                    onChange={handleInput('amount')} 
-                    required
-                    min="0"
-                    step="0.01"
-                    disabled={loading}
-                />
-            </div>
-            <div className="input-control">
-                <DatePicker 
-                    id='date'
-                    placeholderText='Select Date'
-                    selected={date}
-                    dateFormat="dd/MM/yyyy"
-                    onChange={(date) => {
-                        setInputState({...inputState, date: date})
-                    }}
-                    required
-                    disabled={loading}
-                />
-            </div>
-            <div className="selects input-control">
-                <select 
-                    required 
-                    value={category} 
-                    name="category" 
-                    id="category" 
-                    onChange={handleInput('category')}
-                    disabled={loading}
-                >
-                    <option value="" disabled>Select Category</option>
-                    <option value="education">Education</option>
-                    <option value="groceries">Groceries</option>
-                    <option value="health">Health</option>
-                    <option value="subscriptions">Subscriptions</option>
-                    <option value="takeaways">Takeaways</option>
-                    <option value="clothing">Clothing</option>  
-                    <option value="travelling">Travelling</option>  
-                    <option value="other">Other</option>  
-                </select>
-            </div>
-            <div className="input-control">
-                <textarea 
-                    name="description" 
-                    value={description} 
-                    placeholder='Add Description' 
-                    id="description" 
-                    cols="30" 
-                    rows="4" 
-                    onChange={handleInput('description')}
-                    required
-                    disabled={loading}
-                ></textarea>
-            </div>
-            <div className="submit-btn">
+
+            <div className="form-actions">
                 <Button 
                     name={loading ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Expense' : 'Add Expense')}
                     icon={isEditing ? editIcon : plus}
-                    bPad={'.8rem 1.6rem'}
-                    bRad={'30px'}
-                    bg={'var(--color-accent)'}
-                    color={'#fff'}
+                    bPad={'1rem 2rem'}
+                    bRad={'12px'}
+                    variant={isEditing ? "primary" : "danger"}
                     disabled={loading}
                     type="submit"
                 />
                 {isEditing && (
                     <Button 
                         name={'Cancel'}
-                        bPad={'.8rem 1.6rem'}
-                        bRad={'30px'}
-                        bg={'var(--color-grey)'}
-                        color={'#fff'}
+                        bPad={'1rem 2rem'}
+                        bRad={'12px'}
+                        variant="secondary"
                         onClick={handleCancel}
                         disabled={loading}
                         type="button"
@@ -190,81 +223,195 @@ function ExpenseForm() {
 }
 
 const ExpenseFormStyled = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+    background: var(--background-card);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: var(--border-radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--color-delete), var(--color-delete-light));
+    }
     
     .form-header {
         text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: 2rem;
+        
+        .form-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--color-delete), var(--color-delete-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            
+            i {
+                font-size: 1.5rem;
+                color: white;
+            }
+        }
         
         h3 {
             color: var(--primary-color);
             font-size: 1.5rem;
-            font-weight: 600;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        p {
+            color: var(--primary-color3);
+            font-size: 0.9rem;
+            margin: 0;
         }
     }
     
-    input, textarea, select{
-        font-family: inherit;
-        font-size: inherit;
-        outline: none;
-        border: none;
-        padding: .8rem 1rem;
-        border-radius: 8px;
-        border: 2px solid #e1e1e1;
-        background: #fff;
-        resize: none;
-        box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
-        color: rgba(34, 34, 96, 0.9);
-        transition: border-color 0.3s ease;
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
         
-        &::placeholder{
-            color: rgba(34, 34, 96, 0.4);
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            
+            &.full-width {
+                grid-column: 1 / -1;
+            }
+            
+            label {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: var(--primary-color);
+                margin-bottom: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .input-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+                
+                .input-icon {
+                    position: absolute;
+                    left: 1rem;
+                    color: var(--primary-color3);
+                    font-size: 0.875rem;
+                    z-index: 1;
+                    transition: var(--transition);
+                }
+                
+                &:focus-within .input-icon {
+                    color: var(--color-accent);
+                }
+                
+                &.date-wrapper {
+                    .react-datepicker-wrapper {
+                        width: 100%;
+                    }
+                }
+            }
+        }
+    }
+    
+    input, textarea, select {
+        font-family: inherit;
+        font-size: 0.95rem;
+        outline: none;
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        padding: 1rem 1rem 1rem 3rem;
+        border-radius: var(--border-radius-md);
+        background: var(--background-secondary);
+        color: var(--primary-color);
+        transition: var(--transition);
+        width: 100%;
+        
+        &::placeholder {
+            color: var(--primary-color3);
         }
         
         &:focus {
             border-color: var(--color-accent);
-            box-shadow: 0px 1px 15px rgba(245, 102, 146, 0.2);
+            background: var(--background-card);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
         }
         
         &:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            background: #f5f5f5;
+            background: var(--color-grey-light);
         }
     }
     
-    .input-control{
-        input{
-            width: 100%;
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+        line-height: 1.5;
+    }
+    
+    select {
+        cursor: pointer;
+        
+        option {
+            padding: 0.5rem;
         }
     }
-
-    .selects{
-        display: flex;
-        justify-content: flex-end;
-        select{
-            color: rgba(34, 34, 96, 0.4);
-            width: 100%;
-            &:focus, &:active{
-                color: rgba(34, 34, 96, 1);
-            }
-        }
-    }
-
-    .submit-btn{
+    
+    .form-actions {
         display: flex;
         gap: 1rem;
         justify-content: center;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
         
-        button{
-            box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
+        button {
+            min-width: 140px;
+        }
+    }
+    
+    .error {
+        margin-bottom: 1.5rem;
+        animation: slideInDown 0.3s ease-out;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        padding: 1.5rem;
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
             
-            &:hover:not(:disabled){
-                background: var(--color-green) !important;
-                transform: translateY(-2px);
+            button {
+                width: 100%;
             }
         }
     }
