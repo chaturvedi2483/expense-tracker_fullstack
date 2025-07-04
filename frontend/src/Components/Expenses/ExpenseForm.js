@@ -96,6 +96,7 @@ function ExpenseForm() {
             </div>
 
             {error && <div className="error">{error}</div>}
+            }
 
             <div className="form-grid">
                 <div className="input-group">
